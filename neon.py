@@ -44,13 +44,14 @@ try:
     from tools.method import AttackMethod
 except (ImportError, NameError) as err:
     print(f"{Fore.RED}[!] {Fore.MAGENTA}Failed to import something: {err}{Fore.RESET}")
+    sys.exit(1)
 
 def main() -> None:
     """Run the main application."""
     show_logo()  # Replace with the actual function call
     try:
         if (method := check_method_input()) in ["arp-spoof", "disconnect"]:
-            show_local_host_ips()
+            show_local_host_ips()  # Import statement added
         target = (
             check_http_target_input()
             if method not in ["arp-spoof", "disconnect"]
