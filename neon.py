@@ -2,43 +2,52 @@
 import os
 import sys
 import subprocess
-from colorama import Fore
+from colorama import Fore, Style
 
 # Function to handle login
 def login() -> bool:
-    username = input("Enter username: ")
-    password = input("Enter password: ")
+    username = os.environ.get("MY_USERNAME")
+    password = os.environ.get("MY_PASSWORD")
+
+    if not (username and password):
+        print(f"{Fore.RED}[!] {Fore.MAGENTA}Username or password not set. Exiting.{Fore.RESET}")
+        sys.exit(1)
+
+    os.system("neofetch")  # Display neofetch during login
+    entered_username = input(f"{Fore.CYAN}Enter username: {Fore.RESET}")
+    entered_password = input(f"{Fore.CYAN}Enter password: {Fore.RESET}")
 
     # Check login credentials
-    return username == "arxu" and password == "mionet"
+    return entered_username == username and entered_password == password
+
+# Set your desired username and password
+os.environ["MY_USERNAME"] = "arxu"
+os.environ["MY_PASSWORD"] = "mionet"
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 os.system("cls" if os.name == "nt" else "clear")
 
 # Add login check
 if not login():
-    print(f"{Fore.RED}[!] {Fore.MAGENTA}Invalid login credentials. Exiting.\n{Fore.RESET}")
+    print(f"{Fore.RED}[!] {Fore.MAGENTA}Invalid login credentials. Exiting.{Fore.RESET}")
     sys.exit(1)
 
-# Add neofetch command here
-try:
-    subprocess.run(["neofetch"], check=True)
-except subprocess.CalledProcessError:
-    pass
+# Clear terminal after successful login
+os.system("cls" if os.name == "nt" else "clear")
 
 try:
     from tools.addons.checks import (check_http_target_input,
                                      check_local_target_input,
                                      check_method_input, check_number_input)
     from tools.addons.ip_tools import show_local_host_ips
-    from tools.addons.logo import show_logo
+    from tools.addons.logo import show_logo  # Replace with actual import
     from tools.method import AttackMethod
 except (ImportError, NameError) as err:
-    print("\nFailed to import something", err)
+    print(f"{Fore.RED}[!] {Fore.MAGENTA}Failed to import something: {err}{Fore.RESET}")
 
 def main() -> None:
     """Run the main application."""
-    show_logo()
+    show_logo()  # Replace with the actual function call
     try:
         if (method := check_method_input()) in ["arp-spoof", "disconnect"]:
             show_local_host_ips()
@@ -48,12 +57,12 @@ def main() -> None:
             else check_local_target_input()
         )
         threads = (
-            check_number_input("threads")
+            check_number_input(f"{Fore.CYAN}Enter threads: {Fore.RESET}")
             if method not in ["arp-spoof", "disconnect"]
             else 1
         )
-        time = check_number_input("time")
-        sleep_time = check_number_input("sleep time") if "slowloris" in method else 0
+        time = check_number_input(f"{Fore.CYAN}Enter time: {Fore.RESET}")
+        sleep_time = check_number_input(f"{Fore.CYAN}Enter sleep time: {Fore.RESET}") if "slowloris" in method else 0
 
         with AttackMethod(
             duration=time,
@@ -65,8 +74,7 @@ def main() -> None:
             attack.start()
     except KeyboardInterrupt:
         print(
-            f"\n\n{Fore.RED}[!] {Fore.MAGENTA}Ctrl+C detected. Program closed.\n\n{Fore.RESET}"
-        )
+            f"\n\n{Fore.RED}[!] {Fore.MAGENTA}Ctrl+C detected. Program closed.{Fore.RESET}")
         sys.exit(1)
 
 if __name__ == "__main__":
